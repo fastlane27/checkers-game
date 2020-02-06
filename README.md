@@ -15,34 +15,39 @@ Play classic **American Checkers** on an 8x8 checkerboard requiring two human pl
 
 ```
 1. Define required constants
- - Define two-dimensional array to store checkerboard positions
+ - Define two-dimensional array to store checkerboard grid positions
  - Define game object housing checker pieces by color for each player
 
 2. Define game state variables
- - Define a turn variable to store and track player turns
- - Define a winner variable to track and check for win condition
+ - Define turn variable to store and track player turns
+ - Define winner variable to track and check for win condition
 
 3. Store elements on the page that will be accessed
- - Store the grid elements of the checkerboard
- - Store the turn/win message element
+ - Select and store all grid elements of the checkerboard
+ - Store turn/win message element
  
 4. Initialize state variables
  - Initialize player turn by setting to 1 or -1 for player 1 and 2 respectively
- - Initialize winner to null to represent no current winner
+ - Initialize winner to null to represent no current winner or 1/-1 to indicate winner
 
 5. Render the game based on state
- - Loop over the game object and render the game pieces to the board
- - Use the indexs of board to place each pieces in the correct position
+ - Loop over game pieces object to create and render game pieces to the board
+ - Use each index of board grid to place pieces in correct position
  - If game piece captured, render to side of board
- - Set the turn/win message to display player turn if game not over or win message if winner
+ - Set turn/win message to display player turn if game not over or win message if winner
+ - Add crown symbol to game piece if piece becomes king
  
-6. Handle players clicking game pieces and replay button
- - Obtain the index of the grid position clicked on by player and game piece
- - Obtain the indexs on the grid of valid move positions
+6. Handle players selecting and moving game pieces
+ - Obtain index of grid position clicked on by player, if game piece present and color matches turn, select piece
+ - Obtain each index on grid adjacent to selected piece, highlight valid move positions
+ - Check if enemy piece in jumpabled position of selected piece and jump position not occuppied
  - If player clicks on valid position, move selected piece to new position
- - If move 'jumps' over enemy piece, remove ('capture') enemy piece
- - Remove handler from pieces captured
- - If player moves a piece, flip the turn value
+ - If move jumps over enemy piece, remove ('capture') enemy piece from grid and place next to board
+ - Remove/disable handler from pieces captured to prevent selecting
+ - If piece reaches opposite end of board, king it and enable backward movement
+ - After player successfully moves piece, flip turn value (multiply by -1)
  - If a player has no pieces on board, set win value to player number with pieces still on the grid
- - Reinitialize the game if player clicks on replay button
+ 
+ 7. Handle replay button click
+ - Set game to initial state if player clicks on replay button
 ```
