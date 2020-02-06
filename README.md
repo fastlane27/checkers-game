@@ -49,5 +49,5 @@ Play classic **American Checkers** on an 8x8 checkerboard requiring two human pl
  - If a player has no pieces on board, set win value to player number with pieces still on the grid
  
  7. Handle replay button click
- - Set game to initial state if player clicks on replay button
+  - Set game to initial state if player clicks on replay button
 ```
