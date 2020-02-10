@@ -8,6 +8,7 @@ body {
     display: flex;
     align-items: center;
     flex-direction: column;
+    background-color: rgb(64, 64, 64);
 }
 
 h1 {
@@ -17,6 +18,7 @@ h1 {
 }
 
 h2 {
+    color: white;
     font-size: 28px;
     margin-bottom: 20px;
 }
@@ -33,13 +35,11 @@ section {
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.row-a:nth-of-type(odd), .row-b:nth-of-type(even) {
     background-color: red;
+    color: white;
 }
 
-.row-a:nth-of-type(even), .row-b:nth-of-type(odd) {
+.playable {
     background-color: black;
 }
 
@@ -56,4 +56,11 @@ button {
 
 button:active {
     background-color: darkred;
+}
+
+span {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 3px solid white;
 }

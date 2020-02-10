@@ -1,40 +1,62 @@
 /*----- constants -----*/
 class GamePiece {
-    constructor(piece) {
-        this.piece = 'O';
+    constructor(player) {
+        this.player = player;
+        this.piece = document.createElement('span');
+    }
+    positionPiece(position) {
+        if (this.player === 1) this.piece.style.backgroundColor = 'black';
+        if (this.player === -1) this.piece.style.backgroundColor = 'red';
+        position.appendChild(this.piece);
     }
 }
 
+
 /*----- app's state (variables) -----*/
+let board;
 
 
 /*----- cached element references -----*/
-const gridEls = document.querySelectorAll('section');
+const squareEls = document.querySelectorAll('.playable');
+
 
 /*----- event listeners -----*/
+document.getElementById('board').addEventListener('click', selectPiece);
 
 
 /*----- functions -----*/
 
-// on or off the board
-// red or black
-// position
-
 init();
 
 function init() {
+    board = [
+        [-1,-1,-1,-1],
+        [-1,-1,-1,-1],
+        [-1,-1,-1,-1],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [1, 1, 1, 1],
+        [1, 1, 1, 1],
+        [1, 1, 1, 1],
+    ];
+
     render();
 }
 
 function render() {
-    for (let gridEl in gridEls) {
-        // console.log(gridEl.dataset.y);
-        console.log(gridEl);
-    }
+    squareEls.forEach(function(square) {
+        if (board[square.dataset.x][square.dataset.y] === 1) {
+            let blackPiece = new GamePiece(1);
+            blackPiece.positionPiece(square);
+        } 
+        if (board[square.dataset.x][square.dataset.y] === -1) {
+            let redPiece = new GamePiece(-1);
+            redPiece.positionPiece(square);
+        }
+    });
 }
 
-/*
-02, 04, 06, 08
-09, 11, 13, 15
-17, 19, 21, 23
-*/
+function selectPiece(evt) {
+    if (evt.target.tagName !== 'SPAN') return;
+    console.log('game piece');
+}
