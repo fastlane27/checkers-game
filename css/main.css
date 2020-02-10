@@ -23,7 +23,7 @@ h2 {
     margin-bottom: 20px;
 }
 
-main {
+#board {
     display: grid;
     grid-template: repeat(8, 1fr) / repeat(8, 1fr);
     width: 700px;
@@ -43,7 +43,7 @@ section {
     background-color: black;
 }
 
-button {
+#reset {
     border: none;
     border-radius: 10px;
     font-size: 26px;
@@ -54,7 +54,7 @@ button {
     cursor: pointer;
 }
 
-button:active {
+#reset:active {
     background-color: darkred;
 }
 
@@ -63,4 +63,8 @@ span {
     height: 64px;
     border-radius: 50%;
     border: 3px solid white;
+}
+
+.selected {
+    border-color: yellow;
 }
