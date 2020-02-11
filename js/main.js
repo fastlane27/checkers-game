@@ -59,12 +59,14 @@ function render() {
 function renderPieces() {
     squareEls.forEach(function(square) {
         if (square.hasChildNodes()) square.firstChild.remove();
-        if (board[square.dataset.x][square.dataset.y] === -1) {
-            let blackPiece = new GamePiece(board[square.dataset.x][square.dataset.y]);
+        let x = parseInt(square.dataset.x);
+        let y = parseInt(square.dataset.y);
+        if (board[x][y] === -1) {
+            let blackPiece = new GamePiece(board[x][y]);
             blackPiece.positionPiece(square);
         } 
-        if (board[square.dataset.x][square.dataset.y] === 1) {
-            let redPiece = new GamePiece(board[square.dataset.x][square.dataset.y]);
+        else if (board[x][y] === 1) {
+            let redPiece = new GamePiece(board[x][y]);
             redPiece.positionPiece(square);
         }
     });
@@ -81,15 +83,31 @@ function selectPiece(evt) {
 
 function movePiece(evt) {
     if (evt.target.className !== 'playable') return;
-    if (board[evt.target.dataset.x][evt.target.dataset.y] !== 0) return;
+    let x = parseInt(evt.target.dataset.x);
+    let y = parseInt(evt.target.dataset.y);
+    if (board[x][y] !== 0) return;
     squareEls.forEach(function(square) {
-        if (square.firstChild) {
-            if (square.firstChild.className === 'selected') {
-                board[evt.target.dataset.x][evt.target.dataset.y] = parseInt(square.firstChild.dataset.idx);
-                board[square.dataset.x][square.dataset.y] = 0;
+        let selected = square.firstChild;
+        let curPosX = parseInt(square.dataset.x);
+        let curPosY = parseInt(square.dataset.y);
+        if (selected) {
+            if (selected.className === 'selected' && validMove(parseInt(selected.dataset.idx), curPosX, curPosY, x, y)) {
+                board[x][y] = parseInt(selected.dataset.idx);
+                board[curPosX][curPosY] = 0;
                 turn *= -1;
                 render();
             }
         } 
     });
+}
+
+function validMove(sIdx, curX , curY, tarX, tarY) {
+    if (tarX === curX + sIdx) {
+        if (tarY === curY) return true;
+        else if (curX % 2 === 1 && tarY === curY - 1) {
+            return true;
+        } else if (curX % 2 === 0 && tarY === curY + 1) {
+            return true;
+        } else return false;
+    }
 }
