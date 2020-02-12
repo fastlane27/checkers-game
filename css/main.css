@@ -59,8 +59,8 @@ section {
 }
 
 span {
-    width: 64px;
-    height: 64px;
+    width: 78%;
+    height: 78%;
     border-radius: 50%;
     border: 3px solid white;
 }

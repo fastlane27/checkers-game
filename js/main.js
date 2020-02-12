@@ -1,22 +1,46 @@
 /*----- constants -----*/
 class GamePiece {
-    constructor(player) {
-        this.player = player;
-        this.piece = document.createElement('span');
+    constructor(posX, posY) {
+        this.pieceEl = document.createElement('span');
+        this.posX = posX;
+        this.posY = posY;
+        this.isSelected = false;
+        this.isKing = false;
     }
-    positionPiece(position) {
-        if (this.player === -1) {
-            this.piece.style.backgroundColor = 'black';
-            this.piece.dataset.idx = this.player;
-        }
-        if (this.player === 1) {
-            this.piece.style.backgroundColor = 'red';
-            this.piece.dataset.idx = this.player;
-        }
-        position.appendChild(this.piece);
+    toggleSelect() {      
+        this.isSelected = !this.isSelected;
     }
 }
 
+class BlackPiece extends GamePiece {
+    constructor(posX, posY) {
+        super(posX, posY);
+        this.player = -1;
+        this.color = 'black';
+    }
+    placePiece(square) {
+        this.pieceEl.dataset.player = this.player;
+        this.pieceEl.dataset.posX = this.posX;
+        this.pieceEl.dataset.posY = this.posY;
+        this.pieceEl.style.backgroundColor = this.color;
+        square.appendChild(this.pieceEl);
+    }
+}
+
+class RedPiece extends GamePiece {
+    constructor(posX, posY) {
+        super(posX, posY);
+        this.player = 1;
+        this.color = 'red';
+    }
+    placePiece(square) {
+        this.pieceEl.dataset.player = this.player;
+        this.pieceEl.dataset.posX = this.posX;
+        this.pieceEl.dataset.posY = this.posY;
+        this.pieceEl.style.backgroundColor = this.color;
+        square.appendChild(this.pieceEl);
+    }
+}
 
 /*----- app's state (variables) -----*/
 let board;
@@ -28,8 +52,8 @@ const titleEl = document.getElementById('turn');
 
 
 /*----- event listeners -----*/
-document.getElementById('board').addEventListener('click', selectPiece);
-document.getElementById('board').addEventListener('click', movePiece);
+document.getElementById('board').addEventListener('click', handleSelect);
+document.getElementById('board').addEventListener('click', handleMove);
 document.getElementById('reset').addEventListener('click', init);
 
 
@@ -38,71 +62,108 @@ init();
 
 function init() {
     board = [
-        [ 1, 1, 1, 1],
-        [ 1, 1, 1, 1],
-        [ 1, 1, 1, 1],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [-1, -1, -1, -1],
-        [-1, -1, -1, -1],
-        [-1, -1, -1, -1],
+        [null, null, null, null],
+        [null, null, null, null],
+        [null, null, null, null],
+        [null, null, null, null],
+        [null, null, null, null],
+        [null, null, null, null],
+        [null, null, null, null],
+        [null, null, null, null],
     ];
     turn = -1;
+    clearBoard();
+    populateBoard();
+}
+
+function clearBoard() {
+    squareEls.forEach(function(square) {
+        if (square.hasChildNodes()) square.firstChild.remove();
+    });
+}
+
+function populateBoard() {
+    for (let i = 5; i < 8; i++) {
+        for (let j = 0; j < board[i].length; j++) {
+            board[i][j] = new BlackPiece(i, j);
+        }
+    }
+    for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < board[i].length; j++) {
+            board[i][j] = new RedPiece(i, j);
+        }
+    }
     render();
 }
 
 function render() {
-    turn === -1 ? titleEl.textContent = "Black's Turn" : titleEl.textContent = "Red's Turn";
     renderPieces();
+    renderMessage();
 }
 
 function renderPieces() {
     squareEls.forEach(function(square) {
-        if (square.hasChildNodes()) square.firstChild.remove();
         let x = parseInt(square.dataset.x);
         let y = parseInt(square.dataset.y);
-        if (board[x][y] === -1) {
-            let blackPiece = new GamePiece(board[x][y]);
-            blackPiece.positionPiece(square);
-        } 
-        else if (board[x][y] === 1) {
-            let redPiece = new GamePiece(board[x][y]);
-            redPiece.positionPiece(square);
+        if (!square.hasChildNodes()) { 
+            square.classList.remove('occupied');
+            if (board[x][y] !== null && board[x][y].posX === x && board[x][y].posY === y) {
+                board[x][y].placePiece(square);
+                square.classList.add('occupied');
+            }
         }
     });
 }
 
-function selectPiece(evt) {
-    if (evt.target.tagName !== 'SPAN') return;
-    if (parseInt(evt.target.dataset.idx) !== turn) return;
-    squareEls.forEach(function(square) {
-        if (square.firstChild) square.firstChild.classList.remove('selected');
-    });
+function renderMessage() {
+    turn === -1 ? titleEl.textContent = "Black's Turn" : titleEl.textContent = "Red's Turn";
+}
+
+function selectPiece(tar) {
+    board[parseInt(tar.dataset.posX)][parseInt(tar.dataset.posY)].toggleSelect();
+}
+
+function handleSelect(evt) {
+    if (evt.target.tagName !== 'SPAN' || parseInt(evt.target.dataset.player) !== turn) return;
+    let selected = document.querySelector('.selected');
+    if (selected !== null) {
+        selectPiece(selected);
+        selected.classList.remove('selected');
+    }
+    selectPiece(evt.target);
     evt.target.classList.add('selected');
 }
 
-function movePiece(evt) {
-    if (evt.target.className !== 'playable') return;
-    let x = parseInt(evt.target.dataset.x);
-    let y = parseInt(evt.target.dataset.y);
-    if (board[x][y] !== 0) return;
-    squareEls.forEach(function(square) {
-        let selected = square.firstChild;
-        let curPosX = parseInt(square.dataset.x);
-        let curPosY = parseInt(square.dataset.y);
-        if (selected) {
-            if (selected.className === 'selected' && validMove(parseInt(selected.dataset.idx), curPosX, curPosY, x, y)) {
-                board[x][y] = parseInt(selected.dataset.idx);
-                board[curPosX][curPosY] = 0;
-                turn *= -1;
-                render();
-            }
-        } 
-    });
+function movePiece(cur, tar) {
+    let curX = parseInt(cur.dataset.posX);
+    let curY = parseInt(cur.dataset.posY);
+    let x = parseInt(tar.dataset.x);
+    let y = parseInt(tar.dataset.y);
+    board[x][y] = board[curX][curY];
+    board[curX][curY] = null;
+    board[x][y].posX = x;
+    board[x][y].posY = y;
 }
 
-function validMove(sIdx, curX , curY, tarX, tarY) {
-    if (tarX === curX + sIdx) {
+function handleMove(evt) {
+    if (evt.target.className !== 'playable' || evt.target.className === 'occupied') return;
+    let selected = document.querySelector('.selected');
+    if (selected && isValidMove(selected, evt.target)) {
+        selected.parentNode.classList.remove('occupied');
+        movePiece(selected, evt.target);
+        selected.classList.remove('selected');
+        turn *= -1;
+        render();
+    }
+}
+
+function isValidMove(sel, tar) {
+    let playerVal = parseInt(sel.dataset.player);
+    let curX = parseInt(sel.dataset.posX);
+    let curY = parseInt(sel.dataset.posY);
+    let tarX = parseInt(tar.dataset.x);
+    let tarY = parseInt(tar.dataset.y);
+    if (tarX === curX + playerVal) {
         if (tarY === curY) return true;
         else if (curX % 2 === 1 && tarY === curY - 1) {
             return true;
@@ -111,3 +172,10 @@ function validMove(sIdx, curX , curY, tarX, tarY) {
         } else return false;
     }
 }
+
+// function checkForJump() {
+
+//     // black odd check:
+//     // board[i - 1][i - 1] and board[i - 1][i]
+//     // board[i - 2][i - 1] and board[i - 2][i + 1]
+// }
