@@ -4,12 +4,12 @@ class GamePiece {
         this.pieceEl = document.createElement('span');
         this.posX = posX;
         this.posY = posY;
-        this.isSelected = false;
+        // this.isSelected = false;
         this.isKing = false;
     }
-    toggleSelect() {      
-        this.isSelected = !this.isSelected;
-    }
+    // toggleSelect() {      
+    //     this.isSelected = !this.isSelected;
+    // }
 }
 
 class BlackPiece extends GamePiece {
@@ -119,18 +119,18 @@ function renderMessage() {
     turn === -1 ? titleEl.textContent = "Black's Turn" : titleEl.textContent = "Red's Turn";
 }
 
-function selectPiece(tar) {
-    board[parseInt(tar.dataset.posX)][parseInt(tar.dataset.posY)].toggleSelect();
-}
+// function selectPiece(tar) {
+//     board[parseInt(tar.dataset.posX)][parseInt(tar.dataset.posY)].toggleSelect();
+// }
 
 function handleSelect(evt) {
     if (evt.target.tagName !== 'SPAN' || parseInt(evt.target.dataset.player) !== turn) return;
     let selected = document.querySelector('.selected');
     if (selected !== null) {
-        selectPiece(selected);
+        // selectPiece(selected);
         selected.classList.remove('selected');
     }
-    selectPiece(evt.target);
+    // selectPiece(evt.target);
     evt.target.classList.add('selected');
 }
 
@@ -163,7 +163,7 @@ function isValidMove(sel, tar) {
     let curY = parseInt(sel.dataset.posY);
     let tarX = parseInt(tar.dataset.x);
     let tarY = parseInt(tar.dataset.y);
-    if (tarX === curX + playerVal) {
+    if (board[curX][curY].isKing || tarX === curX + playerVal) {
         if (tarY === curY) return true;
         else if (curX % 2 === 1 && tarY === curY - 1) {
             return true;
@@ -173,9 +173,25 @@ function isValidMove(sel, tar) {
     }
 }
 
-// function checkForJump() {
+function checkForJump() {
+    board.forEach(function(rows, idx) {
+        rows.forEach(function(item, idx) {
+            console.log(item);
+        });
+    });
 
-//     // black odd check:
-//     // board[i - 1][i - 1] and board[i - 1][i]
-//     // board[i - 2][i - 1] and board[i - 2][i + 1]
-// }
+    // board[3][1]      board[3][2]
+    //         board[4][1]
+    // board[5][1]      board[5][2]
+    //
+    // board[x-1][y] & board[x-1][y+1]
+    // board[x+1][y] & board[x+1][y+1]
+
+
+    // board[2][0]      board[2][1]
+    //         board[3][1]
+    // board[4][0]      board[4][1]
+    //
+    // board[x-1][y-1] & board[x-1][y]
+    // board[x+1][y-1] & board[x+1][y]
+}
