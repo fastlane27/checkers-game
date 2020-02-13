@@ -4,12 +4,8 @@ class GamePiece {
         this.pieceEl = document.createElement('span');
         this.posX = posX;
         this.posY = posY;
-        // this.isSelected = false;
         this.isKing = false;
     }
-    // toggleSelect() {      
-    //     this.isSelected = !this.isSelected;
-    // }
 }
 
 class BlackPiece extends GamePiece {
@@ -45,17 +41,16 @@ class RedPiece extends GamePiece {
 /*----- app's state (variables) -----*/
 let board;
 let turn;
+let jumpPosition;
 
 /*----- cached element references -----*/
 const squareEls = document.querySelectorAll('.playable');
 const titleEl = document.getElementById('turn');
 
-
 /*----- event listeners -----*/
 document.getElementById('board').addEventListener('click', handleSelect);
 document.getElementById('board').addEventListener('click', handleMove);
 document.getElementById('reset').addEventListener('click', init);
-
 
 /*----- functions -----*/
 init();
@@ -72,6 +67,7 @@ function init() {
         [null, null, null, null],
     ];
     turn = -1;
+    jumpPosition = [];
     clearBoard();
     populateBoard();
 }
@@ -119,18 +115,12 @@ function renderMessage() {
     turn === -1 ? titleEl.textContent = "Black's Turn" : titleEl.textContent = "Red's Turn";
 }
 
-// function selectPiece(tar) {
-//     board[parseInt(tar.dataset.posX)][parseInt(tar.dataset.posY)].toggleSelect();
-// }
-
 function handleSelect(evt) {
     if (evt.target.tagName !== 'SPAN' || parseInt(evt.target.dataset.player) !== turn) return;
     let selected = document.querySelector('.selected');
     if (selected !== null) {
-        // selectPiece(selected);
         selected.classList.remove('selected');
     }
-    // selectPiece(evt.target);
     evt.target.classList.add('selected');
 }
 
@@ -154,6 +144,9 @@ function handleMove(evt) {
         selected.classList.remove('selected');
         turn *= -1;
         render();
+        jumpPosition = [];
+        checkAdjacent();
+        console.log(jumpPosition);
     }
 }
 
@@ -163,35 +156,88 @@ function isValidMove(sel, tar) {
     let curY = parseInt(sel.dataset.posY);
     let tarX = parseInt(tar.dataset.x);
     let tarY = parseInt(tar.dataset.y);
-    if (board[curX][curY].isKing || tarX === curX + playerVal) {
-        if (tarY === curY) return true;
-        else if (curX % 2 === 1 && tarY === curY - 1) {
-            return true;
-        } else if (curX % 2 === 0 && tarY === curY + 1) {
-            return true;
-        } else return false;
+    if (jumpPosition.length === 0 || jumpPosition.every(elem => elem.jumpPos === null)) {
+        if (board[curX][curY].isKing || tarX === curX + playerVal) {
+            if (tarY === curY) return true;
+            else if (curX % 2 === 1 && tarY === curY - 1) {
+                return true;
+            } else if (curX % 2 === 0 && tarY === curY + 1) {
+                return true;
+            } else return false;
+        }
+    } else {
+        // if (tarX === )
     }
 }
 
-function checkForJump() {
-    board.forEach(function(rows, idx) {
-        rows.forEach(function(item, idx) {
-            console.log(item);
+function checkAdjacent() {
+    let pos = '';
+    board.forEach(function(rows, x) {
+        rows.forEach(function(position, y) {
+            if (position !== null && position.player === turn) {
+                if (x % 2 === 1) {
+                    if (x > 0 && y > 0 && board[x-1][y-1] !== null && board[x-1][y-1].player !== position.player) {
+                        pos = 'tl';
+                        jumpPosition.push(storeJumpData(x, y, x-1, y-1, checkJump(x-1, y-1, pos)));
+                    }
+                    if (x > 0 && board[x-1][y] !== null && board[x-1][y].player !== position.player) {
+                        pos = 'tr';
+                        jumpPosition.push(storeJumpData(x, y, x-1, y, checkJump(x-1, y, pos)));
+                    }
+                    if (x < 7 && y > 0 && board[x+1][y-1] !== null && board[x+1][y-1].player !== position.player) {
+                        pos = 'bl';
+                        jumpPosition.push(storeJumpData(x, y, x+1, y-1, checkJump(x+1, y-1, pos)));
+                    }
+                    if (x < 7 && board[x+1][y] !== null && board[x+1][y].player !== position.player) {
+                        pos = 'br';
+                        jumpPosition.push(storeJumpData(x, y, x+1, y, checkJump(x+1, y, pos)));
+                    }
+               }
+               if (x % 2 === 0) {
+                    if (x > 0 && board[x-1][y] !== null && board[x-1][y].player !== position.player) {
+                        pos ='tl';
+                        jumpPosition.push(storeJumpData(x, y, x-1, y, checkJump(x-1, y, pos)));
+                    }
+                    if (x > 0 && y < 3 && board[x-1][y+1] !== null && board[x-1][y+1].player !== position.player) {
+                        pos = 'tr';
+                        jumpPosition.push(storeJumpData(x, y, x-1, y+1, checkJump(x-1, y+1, pos)));
+                    }
+                    if (x < 7 && board[x+1][y] !== null && board[x+1][y].player !== position.player) {
+                        pos = 'bl';
+                        jumpPosition.push(storeJumpData(x, y, x+1, y, checkJump(x+1, y, pos)));
+                    }
+                    if (x < 7 && y < 3 && board[x+1][y+1] !== null && board[x+1][y+1].player !== position.player) {
+                        pos = 'br';
+                        jumpPosition.push(storeJumpData(x, y, x+1, y+1, checkJump(x+1, y+1, pos)));
+                    }
+                }
+            }
         });
     });
+}
 
-    // board[3][1]      board[3][2]
-    //         board[4][1]
-    // board[5][1]      board[5][2]
-    //
-    // board[x-1][y] & board[x-1][y+1]
-    // board[x+1][y] & board[x+1][y+1]
+function checkJump(x, y, pos) {
+    if (x % 2 === 1) {
+        if (pos === 'tl' && x > 0 && y > 0 && board[x-1][y-1] === null) return [x-1, y-1];
+        else if (pos === 'tr' && x > 0 && board[x-1][y] === null) return [x-1, y];
+        else if (pos === 'bl' && x < 7 && y > 0 && board[x+1][y-1] === null) return [x+1, y-1];
+        else if (pos === 'br' && x < 7 && board[x+1][y] === null) return [x+1, y];
+        else return null;
+    }
+    if (x % 2 === 0) {
+        if (pos === 'tl' && x > 0 && board[x-1][y] === null) return [x-1, y];
+        else if (pos === 'tr' && x > 0 && y < 3 && board[x-1][y+1] === null) return [x-1, y+1];
+        else if (pos === 'bl' && x < 7 && board[x+1][y] === null) return [x+1, y];
+        else if (pos === 'br' && x < 7 && y < 3 && board[x+1][y+1] === null) return [x+1, y+1];
+        else return null;
+    }
+}
 
-
-    // board[2][0]      board[2][1]
-    //         board[3][1]
-    // board[4][0]      board[4][1]
-    //
-    // board[x-1][y-1] & board[x-1][y]
-    // board[x+1][y-1] & board[x+1][y]
+function storeJumpData(startX, startY, adjX, adjY, jPos) {
+    let jumpObj = {
+        startPos: [startX, startY],
+        adjacentPos: [adjX, adjY],
+        jumpPos: jPos
+    }
+    return jumpObj;
 }

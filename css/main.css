@@ -8,7 +8,7 @@ body {
     display: flex;
     align-items: center;
     flex-direction: column;
-    background-color: rgb(64, 64, 64);
+    background-color: rgb(48, 48, 48);
 }
 
 h1 {
@@ -35,12 +35,12 @@ section {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: red;
+    background-color: rgb(224, 32, 32);
     color: white;
 }
 
 .playable {
-    background-color: black;
+    background-color: rgb(32, 32, 32);
 }
 
 #reset {
@@ -49,13 +49,13 @@ section {
     font-size: 26px;
     padding: 10px 20px;
     margin: 20px 0;
-    background-color: red;
+    background-color: rgb(224, 32, 32);
     color: white;
     cursor: pointer;
 }
 
 #reset:active {
-    background-color: darkred;
+    background-color: rgb(160, 32, 32);
 }
 
 span {
