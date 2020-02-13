@@ -42,8 +42,11 @@ class RedPiece extends GamePiece {
 let board;
 let turn;
 let jumpPositions;
+let blackPoints;
+let redPoints;
 
 /*----- cached element references -----*/
+const boardEl = document.getElementById('board');
 const squareEls = document.querySelectorAll('.playable');
 const titleEl = document.getElementById('turn');
 
@@ -67,6 +70,8 @@ function init() {
         [null, null, null, null],
     ];
     turn = -1;
+    blackPoints = 12;
+    redPoints = 12;
     jumpPositions = [];
     clearBoard();
     populateBoard();
@@ -115,7 +120,11 @@ function renderPieces() {
 }
 
 function renderMessage() {
-    turn === -1 ? titleEl.textContent = "Black's Turn" : titleEl.textContent = "Red's Turn";
+    if (blackPoints === 0 || redPoints === 0) {
+        blackPoints === 0 ? titleEl.textContent = 'Red Wins!' : titleEl.textContent = 'Black Wins!';
+    } else {
+        turn === -1 ? titleEl.textContent = "Black's Turn" : titleEl.textContent = "Red's Turn";
+    }
 }
 
 function handleSelect(evt) {
@@ -136,9 +145,12 @@ function movePiece(cur, tar) {
     board[curX][curY] = null;
     board[x][y].posX = x;
     board[x][y].posY = y;
+    makeKing(board[x][y]);
 }
 
 function clearPiece(x, y) {
+    board[x][y].player === -1 ? blackPoints-- : redPoints--;
+    checkWinner();
     board[x][y] = null;
 }
 
@@ -157,7 +169,7 @@ function isValidMove(sel, tar) {
                 return true;
             } else return false;
         }
-    } else {
+    } else if (!jumpPositions.some(elem => elem.jumpPos === null)) {
         for (let i = 0; i < jumpPositions.length; i++) {
             if (curX === jumpPositions[i].startPos[0] && curY === jumpPositions[i].startPos[1] && tarX === jumpPositions[i].jumpPos[0] && tarY === jumpPositions[i].jumpPos[1]) {
                 clearPiece(jumpPositions[i].adjacentPos[0], jumpPositions[i].adjacentPos[1]);
@@ -251,4 +263,14 @@ function storeJumpData(startX, startY, adjX, adjY, jPos) {
         jumpPos: jPos
     }
     return jumpObj;
+}
+
+function makeKing(piece) {
+    if (piece.player === -1 && piece.posX === 0) piece.isKing = true;
+    if (piece.player === 1 && piece.posX === 7) piece.isKing = true;
+}
+
+function checkWinner() {
+    if (blackPoints === 0 || redPoints === 0) boardEl.style.pointerEvents = 'none';
+    else boardEl.style.pointerEvents = 'auto'; 
 }

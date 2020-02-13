@@ -68,3 +68,9 @@ span {
 .selected {
     border-color: yellow;
 }
+
+.king {
+    width: 50%;
+    height: 50%;
+    border-radius: 50%;
+}
