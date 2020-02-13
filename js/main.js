@@ -41,7 +41,7 @@ class RedPiece extends GamePiece {
 /*----- app's state (variables) -----*/
 let board;
 let turn;
-let jumpPosition;
+let jumpPositions;
 
 /*----- cached element references -----*/
 const squareEls = document.querySelectorAll('.playable');
@@ -67,7 +67,7 @@ function init() {
         [null, null, null, null],
     ];
     turn = -1;
-    jumpPosition = [];
+    jumpPositions = [];
     clearBoard();
     populateBoard();
 }
@@ -108,6 +108,9 @@ function renderPieces() {
                 square.classList.add('occupied');
             }
         }
+        if (square.hasChildNodes() && board[x][y] === null) {
+            square.firstChild.remove();
+        }
     });
 }
 
@@ -135,19 +138,8 @@ function movePiece(cur, tar) {
     board[x][y].posY = y;
 }
 
-function handleMove(evt) {
-    if (evt.target.className !== 'playable' || evt.target.className === 'occupied') return;
-    let selected = document.querySelector('.selected');
-    if (selected && isValidMove(selected, evt.target)) {
-        selected.parentNode.classList.remove('occupied');
-        movePiece(selected, evt.target);
-        selected.classList.remove('selected');
-        turn *= -1;
-        render();
-        jumpPosition = [];
-        checkAdjacent();
-        console.log(jumpPosition);
-    }
+function clearPiece(x, y) {
+    board[x][y] = null;
 }
 
 function isValidMove(sel, tar) {
@@ -156,7 +148,7 @@ function isValidMove(sel, tar) {
     let curY = parseInt(sel.dataset.posY);
     let tarX = parseInt(tar.dataset.x);
     let tarY = parseInt(tar.dataset.y);
-    if (jumpPosition.length === 0 || jumpPosition.every(elem => elem.jumpPos === null)) {
+    if (jumpPositions.length === 0 || jumpPositions.every(elem => elem.jumpPos === null)) {
         if (board[curX][curY].isKing || tarX === curX + playerVal) {
             if (tarY === curY) return true;
             else if (curX % 2 === 1 && tarY === curY - 1) {
@@ -166,7 +158,26 @@ function isValidMove(sel, tar) {
             } else return false;
         }
     } else {
-        // if (tarX === )
+        for (let i = 0; i < jumpPositions.length; i++) {
+            if (curX === jumpPositions[i].startPos[0] && curY === jumpPositions[i].startPos[1] && tarX === jumpPositions[i].jumpPos[0] && tarY === jumpPositions[i].jumpPos[1]) {
+                clearPiece(jumpPositions[i].adjacentPos[0], jumpPositions[i].adjacentPos[1]);
+                return true;
+            } else return false;
+        }
+    }
+}
+
+function handleMove(evt) {
+    if (evt.target.className !== 'playable' || evt.target.className === 'occupied') return;
+    let selected = document.querySelector('.selected');
+    if (selected && isValidMove(selected, evt.target)) {
+        selected.parentNode.classList.remove('occupied');
+        movePiece(selected, evt.target);
+        selected.classList.remove('selected');
+        turn *= -1;
+        render();
+        jumpPositions = [];
+        checkAdjacent();
     }
 }
 
@@ -178,37 +189,37 @@ function checkAdjacent() {
                 if (x % 2 === 1) {
                     if (x > 0 && y > 0 && board[x-1][y-1] !== null && board[x-1][y-1].player !== position.player) {
                         pos = 'tl';
-                        jumpPosition.push(storeJumpData(x, y, x-1, y-1, checkJump(x-1, y-1, pos)));
+                        jumpPositions.push(storeJumpData(x, y, x-1, y-1, checkJump(x-1, y-1, pos)));
                     }
                     if (x > 0 && board[x-1][y] !== null && board[x-1][y].player !== position.player) {
                         pos = 'tr';
-                        jumpPosition.push(storeJumpData(x, y, x-1, y, checkJump(x-1, y, pos)));
+                        jumpPositions.push(storeJumpData(x, y, x-1, y, checkJump(x-1, y, pos)));
                     }
                     if (x < 7 && y > 0 && board[x+1][y-1] !== null && board[x+1][y-1].player !== position.player) {
                         pos = 'bl';
-                        jumpPosition.push(storeJumpData(x, y, x+1, y-1, checkJump(x+1, y-1, pos)));
+                        jumpPositions.push(storeJumpData(x, y, x+1, y-1, checkJump(x+1, y-1, pos)));
                     }
                     if (x < 7 && board[x+1][y] !== null && board[x+1][y].player !== position.player) {
                         pos = 'br';
-                        jumpPosition.push(storeJumpData(x, y, x+1, y, checkJump(x+1, y, pos)));
+                        jumpPositions.push(storeJumpData(x, y, x+1, y, checkJump(x+1, y, pos)));
                     }
                }
                if (x % 2 === 0) {
                     if (x > 0 && board[x-1][y] !== null && board[x-1][y].player !== position.player) {
                         pos ='tl';
-                        jumpPosition.push(storeJumpData(x, y, x-1, y, checkJump(x-1, y, pos)));
+                        jumpPositions.push(storeJumpData(x, y, x-1, y, checkJump(x-1, y, pos)));
                     }
                     if (x > 0 && y < 3 && board[x-1][y+1] !== null && board[x-1][y+1].player !== position.player) {
                         pos = 'tr';
-                        jumpPosition.push(storeJumpData(x, y, x-1, y+1, checkJump(x-1, y+1, pos)));
+                        jumpPositions.push(storeJumpData(x, y, x-1, y+1, checkJump(x-1, y+1, pos)));
                     }
                     if (x < 7 && board[x+1][y] !== null && board[x+1][y].player !== position.player) {
                         pos = 'bl';
-                        jumpPosition.push(storeJumpData(x, y, x+1, y, checkJump(x+1, y, pos)));
+                        jumpPositions.push(storeJumpData(x, y, x+1, y, checkJump(x+1, y, pos)));
                     }
                     if (x < 7 && y < 3 && board[x+1][y+1] !== null && board[x+1][y+1].player !== position.player) {
                         pos = 'br';
-                        jumpPosition.push(storeJumpData(x, y, x+1, y+1, checkJump(x+1, y+1, pos)));
+                        jumpPositions.push(storeJumpData(x, y, x+1, y+1, checkJump(x+1, y+1, pos)));
                     }
                 }
             }
