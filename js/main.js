@@ -45,6 +45,8 @@ class RedPiece extends GamePiece {
 let board;
 let turn;
 let jumpPositions;
+let canJump;
+let captured;
 let blackPoints;
 let redPoints;
 
@@ -73,9 +75,11 @@ function init() {
         [null, null, null, null],
     ];
     turn = -1;
+    jumpPositions = [];
+    canJump = false;
+    captured = false;
     blackPoints = 12;
     redPoints = 12;
-    jumpPositions = [];
     clearBoard();
     populateBoard();
 }
@@ -155,10 +159,11 @@ function movePiece(cur, tar) {
     makeKing(board[x][y]);
 }
 
-function clearPiece(x, y) {
+function capturePiece(x, y) {
     board[x][y].player === -1 ? blackPoints-- : redPoints--;
     checkWinner();
     board[x][y] = null;
+    captured = true;
 }
 
 function isValidMove(sel, tar) {
@@ -178,9 +183,9 @@ function isValidMove(sel, tar) {
         }
     } else {
         for (let i = 0; i < jumpPositions.length; i++) {
-            if (jumpPositions[i].jumpPos !== null && curX === jumpPositions[i].startPos[0] 
-                && curY === jumpPositions[i].startPos[1] && tarX === jumpPositions[i].jumpPos[0] && tarY === jumpPositions[i].jumpPos[1]) {
-                clearPiece(jumpPositions[i].adjacentPos[0], jumpPositions[i].adjacentPos[1]);
+            if (jumpPositions[i].jumpPos !== null && curX === jumpPositions[i].startPos[0] && curY === jumpPositions[i].startPos[1] 
+                && tarX === jumpPositions[i].jumpPos[0] && tarY === jumpPositions[i].jumpPos[1]) {
+                capturePiece(jumpPositions[i].adjacentPos[0], jumpPositions[i].adjacentPos[1]);
                 return true;
             } 
         }
@@ -194,69 +199,60 @@ function handleMove(evt) {
     if (selected && isValidMove(selected, evt.target)) {
         selected.parentNode.classList.remove('occupied');
         movePiece(selected, evt.target);
-        selected.classList.remove('selected');
-        turn *= -1;
+        if (captured) {
+            checkAdjacent();
+            captured = false;
+        }
+        if (!canJump) {
+            selected.classList.remove('selected');
+            turn *= -1;
+            checkAdjacent();
+        }
         render();
-        jumpPositions = [];
-        checkAdjacent();
     }
 }
 
 function checkAdjacent() {
+    jumpPositions = [];
+    canJump = false;
     let pos = '';
     board.forEach(function(rows, x) {
         rows.forEach(function(position, y) {
             if (position !== null && position.player === turn) {
                 if (x % 2 === 1) {
-                    if (x > 0 && y > 0 && board[x-1][y-1] !== null && board[x-1][y-1].player !== position.player) {
-                        if (position.player === -1 || position.isKing) {
-                            pos = 'tl';
-                            jumpPositions.push(storeJumpData(x, y, x-1, y-1, checkJump(x-1, y-1, pos)));
-                        }
+                    if (x > 0 && y > 0 && board[x-1][y-1] !== null && board[x-1][y-1].player !== position.player && (position.player === -1 || position.isKing)) {
+                        pos = 'tl';
+                        jumpPositions.push(storeJumpData(x, y, x-1, y-1, checkJump(x-1, y-1, pos)));
                     }
-                    if (x > 0 && board[x-1][y] !== null && board[x-1][y].player !== position.player) {
-                        if (position.player === -1 || position.isKing) {
-                            pos = 'tr';
-                            jumpPositions.push(storeJumpData(x, y, x-1, y, checkJump(x-1, y, pos)));
-                        }
+                    if (x > 0 && board[x-1][y] !== null && board[x-1][y].player !== position.player && (position.player === -1 || position.isKing)) {
+                        pos = 'tr';
+                        jumpPositions.push(storeJumpData(x, y, x-1, y, checkJump(x-1, y, pos)));
                     }
-                    if (x < 7 && y > 0 && board[x+1][y-1] !== null && board[x+1][y-1].player !== position.player) {
-                        if (position.player === 1 || position.isKing) {
-                            pos = 'bl';
-                            jumpPositions.push(storeJumpData(x, y, x+1, y-1, checkJump(x+1, y-1, pos)));
-                        }
+                    if (x < 7 && y > 0 && board[x+1][y-1] !== null && board[x+1][y-1].player !== position.player && (position.player === 1 || position.isKing)) {
+                        pos = 'bl';
+                        jumpPositions.push(storeJumpData(x, y, x+1, y-1, checkJump(x+1, y-1, pos)));
                     }
-                    if (x < 7 && board[x+1][y] !== null && board[x+1][y].player !== position.player) {
-                        if (position.player === 1 || position.isKing) {
-                            pos = 'br';
-                            jumpPositions.push(storeJumpData(x, y, x+1, y, checkJump(x+1, y, pos)));
-                        }
+                    if (x < 7 && board[x+1][y] !== null && board[x+1][y].player !== position.player && (position.player === 1 || position.isKing)) {
+                        pos = 'br';
+                        jumpPositions.push(storeJumpData(x, y, x+1, y, checkJump(x+1, y, pos)));
                     }
                }
                if (x % 2 === 0) {
-                    if (x > 0 && board[x-1][y] !== null && board[x-1][y].player !== position.player) {
-                        if (position.player === -1 || position.isKing) {
-                            pos ='tl';
-                            jumpPositions.push(storeJumpData(x, y, x-1, y, checkJump(x-1, y, pos)));
-                        }
+                    if (x > 0 && board[x-1][y] !== null && board[x-1][y].player !== position.player && (position.player === -1 || position.isKing)) {
+                        pos ='tl';
+                        jumpPositions.push(storeJumpData(x, y, x-1, y, checkJump(x-1, y, pos)));
                     }
-                    if (x > 0 && y < 3 && board[x-1][y+1] !== null && board[x-1][y+1].player !== position.player) {
-                        if (position.player === -1 || position.isKing) {
-                            pos = 'tr';
-                            jumpPositions.push(storeJumpData(x, y, x-1, y+1, checkJump(x-1, y+1, pos)));
-                        }
+                    if (x > 0 && y < 3 && board[x-1][y+1] !== null && board[x-1][y+1].player !== position.player && (position.player === -1 || position.isKing)) {
+                        pos = 'tr';
+                        jumpPositions.push(storeJumpData(x, y, x-1, y+1, checkJump(x-1, y+1, pos)));
                     }
-                    if (x < 7 && board[x+1][y] !== null && board[x+1][y].player !== position.player) {
-                        if (position.player === 1 || position.isKing) {
-                            pos = 'bl';
-                            jumpPositions.push(storeJumpData(x, y, x+1, y, checkJump(x+1, y, pos)));
-                        }
+                    if (x < 7 && board[x+1][y] !== null && board[x+1][y].player !== position.player && (position.player === 1 || position.isKing)) {
+                        pos = 'bl';
+                        jumpPositions.push(storeJumpData(x, y, x+1, y, checkJump(x+1, y, pos)));
                     }
-                    if (x < 7 && y < 3 && board[x+1][y+1] !== null && board[x+1][y+1].player !== position.player) {
-                        if (position.player === 1 || position.isKing) {
-                            pos = 'br';
-                            jumpPositions.push(storeJumpData(x, y, x+1, y+1, checkJump(x+1, y+1, pos)));
-                        }
+                    if (x < 7 && y < 3 && board[x+1][y+1] !== null && board[x+1][y+1].player !== position.player && (position.player === 1 || position.isKing)) {
+                        pos = 'br';
+                        jumpPositions.push(storeJumpData(x, y, x+1, y+1, checkJump(x+1, y+1, pos)));
                     }
                 }
             }
@@ -265,19 +261,42 @@ function checkAdjacent() {
 }
 
 function checkJump(x, y, pos) {
+    canJump = true;
     if (x % 2 === 1) {
-        if (pos === 'tl' && x > 0 && y > 0 && board[x-1][y-1] === null) return [x-1, y-1];
-        else if (pos === 'tr' && x > 0 && board[x-1][y] === null) return [x-1, y];
-        else if (pos === 'bl' && x < 7 && y > 0 && board[x+1][y-1] === null) return [x+1, y-1];
-        else if (pos === 'br' && x < 7 && board[x+1][y] === null) return [x+1, y];
-        else return null;
+        if (pos === 'tl' && x > 0 && y > 0 && board[x-1][y-1] === null) {
+            return [x-1, y-1];
+        }
+        else if (pos === 'tr' && x > 0 && board[x-1][y] === null) {
+            return [x-1, y];
+        }
+        else if (pos === 'bl' && x < 7 && y > 0 && board[x+1][y-1] === null) {
+            return [x+1, y-1];
+        }
+        else if (pos === 'br' && x < 7 && board[x+1][y] === null) {
+            return [x+1, y];
+        }
+        else {
+            canJump = false;
+            return null;
+        }
     }
     if (x % 2 === 0) {
-        if (pos === 'tl' && x > 0 && board[x-1][y] === null) return [x-1, y];
-        else if (pos === 'tr' && x > 0 && y < 3 && board[x-1][y+1] === null) return [x-1, y+1];
-        else if (pos === 'bl' && x < 7 && board[x+1][y] === null) return [x+1, y];
-        else if (pos === 'br' && x < 7 && y < 3 && board[x+1][y+1] === null) return [x+1, y+1];
-        else return null;
+        if (pos === 'tl' && x > 0 && board[x-1][y] === null) {
+            return [x-1, y];
+        }
+        else if (pos === 'tr' && x > 0 && y < 3 && board[x-1][y+1] === null) {
+            return [x-1, y+1];
+        }
+        else if (pos === 'bl' && x < 7 && board[x+1][y] === null) {
+            return [x+1, y];
+        }
+        else if (pos === 'br' && x < 7 && y < 3 && board[x+1][y+1] === null) {
+            return [x+1, y+1];
+        }
+        else {
+            canJump = false;
+            return null;
+        }
     }
 }
 
