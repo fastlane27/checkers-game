@@ -10,7 +10,9 @@ Play classic [**American Checkers**](https://en.wikipedia.org/wiki/English_draug
 - JavaScript
 
 ## Getting Started
-### [Click here](https://fastlane27.github.io/checkers-game/) to play the game!
+**[Click here](https://fastlane27.github.io/checkers-game/) to play the game!**  
+Remember, if a jump is available you have to take it!
+
 ---
 ## Next Steps
 - Highlight squares a piece can move to
