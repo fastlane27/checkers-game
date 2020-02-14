@@ -80,6 +80,7 @@ function init() {
     captured = false;
     blackPoints = 12;
     redPoints = 12;
+    checkWinner()
     clearBoard();
     populateBoard();
 }
