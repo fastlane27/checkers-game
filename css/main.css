@@ -13,22 +13,22 @@ body {
 
 h1 {
     color: red;
-    font-size: 40px;
-    margin: 20px 0 10px 0;
+    font-size: 5vh;
+    margin: 2vh 0 1vh 0;
 }
 
 #turn {
     color: white;
-    font-size: 28px;
-    margin-bottom: 20px;
+    font-size: 3vh;
+    margin-bottom: 2vh;
 }
 
 #board {
     display: grid;
     grid-template: repeat(8, 1fr) / repeat(8, 1fr);
-    width: 700px;
-    height: 700px;
-    border: 4px solid black;
+    width: 75vh;
+    height: 75vh;
+    border: 0.75vh solid black;
 }
 
 section {
@@ -45,10 +45,10 @@ section {
 
 #reset {
     border: none;
-    border-radius: 10px;
-    font-size: 26px;
-    padding: 10px 20px;
-    margin: 20px 0;
+    border-radius: 1vh;
+    font-size: 3vh;
+    padding: 1vh 2vh;
+    margin: 2vh 0;
     background-color: rgb(224, 32, 32);
     color: white;
     cursor: pointer;
@@ -65,7 +65,7 @@ span {
     width: 78%;
     height: 78%;
     border-radius: 50%;
-    border: 3px solid white;
+    border: 0.4vh solid white;
 }
 
 .selected {
