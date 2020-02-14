@@ -1,5 +1,5 @@
 # Checkers
-Play classic [**American Checkers**](https://en.wikipedia.org/wiki/English_draughts) on an 8x8 checkerboard with two human players head to head. Remember, if a jump is available, you have to take it!
+Play classic [**American Checkers**](https://en.wikipedia.org/wiki/English_draughts) on an 8x8 checkerboard with two human players head to head.
 
 ## Screenshots
 ![alt text](imgs/screenshot.png "Checkers Screenshot")
