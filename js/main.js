@@ -75,11 +75,10 @@ function init() {
         [null, null, null, null],
     ];
     turn = -1;
-    jumpPositions = [];
-    canJump = false;
     captured = false;
     blackPoints = 12;
     redPoints = 12;
+    resetJumps();
     checkWinner()
     clearBoard();
     populateBoard();
@@ -201,62 +200,66 @@ function handleMove(evt) {
         selected.parentNode.classList.remove('occupied');
         movePiece(selected, evt.target);
         if (captured) {
-            checkAdjacent();
+            resetJumps();
+            checkAdjacent(board[parseInt(evt.target.dataset.x)][parseInt(evt.target.dataset.y)], parseInt(evt.target.dataset.x), parseInt(evt.target.dataset.y));
             captured = false;
         }
         if (!canJump) {
             selected.classList.remove('selected');
             turn *= -1;
-            checkAdjacent();
+            checkAllAdjacent();
         }
         render();
     }
 }
 
-function checkAdjacent() {
-    jumpPositions = [];
-    canJump = false;
+function checkAdjacent(position, x, y) {
     let pos = '';
+    if (position !== null && position.player === turn) {
+        if (x % 2 === 1) {
+            if (x > 0 && y > 0 && board[x-1][y-1] !== null && board[x-1][y-1].player !== position.player && (position.player === -1 || position.isKing)) {
+                pos = 'tl';
+                jumpPositions.push(storeJumpData(x, y, x-1, y-1, checkJump(x-1, y-1, pos)));
+            }
+            if (x > 0 && board[x-1][y] !== null && board[x-1][y].player !== position.player && (position.player === -1 || position.isKing)) {
+                pos = 'tr';
+                jumpPositions.push(storeJumpData(x, y, x-1, y, checkJump(x-1, y, pos)));
+            }
+            if (x < 7 && y > 0 && board[x+1][y-1] !== null && board[x+1][y-1].player !== position.player && (position.player === 1 || position.isKing)) {
+                pos = 'bl';
+                jumpPositions.push(storeJumpData(x, y, x+1, y-1, checkJump(x+1, y-1, pos)));
+            }
+            if (x < 7 && board[x+1][y] !== null && board[x+1][y].player !== position.player && (position.player === 1 || position.isKing)) {
+                pos = 'br';
+                jumpPositions.push(storeJumpData(x, y, x+1, y, checkJump(x+1, y, pos)));
+            }
+        }
+        if (x % 2 === 0) {
+            if (x > 0 && board[x-1][y] !== null && board[x-1][y].player !== position.player && (position.player === -1 || position.isKing)) {
+                pos ='tl';
+                jumpPositions.push(storeJumpData(x, y, x-1, y, checkJump(x-1, y, pos)));
+            }
+            if (x > 0 && y < 3 && board[x-1][y+1] !== null && board[x-1][y+1].player !== position.player && (position.player === -1 || position.isKing)) {
+                pos = 'tr';
+                jumpPositions.push(storeJumpData(x, y, x-1, y+1, checkJump(x-1, y+1, pos)));
+            }
+            if (x < 7 && board[x+1][y] !== null && board[x+1][y].player !== position.player && (position.player === 1 || position.isKing)) {
+                pos = 'bl';
+                jumpPositions.push(storeJumpData(x, y, x+1, y, checkJump(x+1, y, pos)));
+            }
+            if (x < 7 && y < 3 && board[x+1][y+1] !== null && board[x+1][y+1].player !== position.player && (position.player === 1 || position.isKing)) {
+                pos = 'br';
+                jumpPositions.push(storeJumpData(x, y, x+1, y+1, checkJump(x+1, y+1, pos)));
+            }
+        }
+    }
+}
+
+function checkAllAdjacent() {
+    resetJumps();
     board.forEach(function(rows, x) {
         rows.forEach(function(position, y) {
-            if (position !== null && position.player === turn) {
-                if (x % 2 === 1) {
-                    if (x > 0 && y > 0 && board[x-1][y-1] !== null && board[x-1][y-1].player !== position.player && (position.player === -1 || position.isKing)) {
-                        pos = 'tl';
-                        jumpPositions.push(storeJumpData(x, y, x-1, y-1, checkJump(x-1, y-1, pos)));
-                    }
-                    if (x > 0 && board[x-1][y] !== null && board[x-1][y].player !== position.player && (position.player === -1 || position.isKing)) {
-                        pos = 'tr';
-                        jumpPositions.push(storeJumpData(x, y, x-1, y, checkJump(x-1, y, pos)));
-                    }
-                    if (x < 7 && y > 0 && board[x+1][y-1] !== null && board[x+1][y-1].player !== position.player && (position.player === 1 || position.isKing)) {
-                        pos = 'bl';
-                        jumpPositions.push(storeJumpData(x, y, x+1, y-1, checkJump(x+1, y-1, pos)));
-                    }
-                    if (x < 7 && board[x+1][y] !== null && board[x+1][y].player !== position.player && (position.player === 1 || position.isKing)) {
-                        pos = 'br';
-                        jumpPositions.push(storeJumpData(x, y, x+1, y, checkJump(x+1, y, pos)));
-                    }
-               }
-               if (x % 2 === 0) {
-                    if (x > 0 && board[x-1][y] !== null && board[x-1][y].player !== position.player && (position.player === -1 || position.isKing)) {
-                        pos ='tl';
-                        jumpPositions.push(storeJumpData(x, y, x-1, y, checkJump(x-1, y, pos)));
-                    }
-                    if (x > 0 && y < 3 && board[x-1][y+1] !== null && board[x-1][y+1].player !== position.player && (position.player === -1 || position.isKing)) {
-                        pos = 'tr';
-                        jumpPositions.push(storeJumpData(x, y, x-1, y+1, checkJump(x-1, y+1, pos)));
-                    }
-                    if (x < 7 && board[x+1][y] !== null && board[x+1][y].player !== position.player && (position.player === 1 || position.isKing)) {
-                        pos = 'bl';
-                        jumpPositions.push(storeJumpData(x, y, x+1, y, checkJump(x+1, y, pos)));
-                    }
-                    if (x < 7 && y < 3 && board[x+1][y+1] !== null && board[x+1][y+1].player !== position.player && (position.player === 1 || position.isKing)) {
-                        pos = 'br';
-                        jumpPositions.push(storeJumpData(x, y, x+1, y+1, checkJump(x+1, y+1, pos)));
-                    }
-                }
-            }
+            checkAdjacent(position, x, y);
         });
     });
 }
@@ -300,6 +303,11 @@ function checkJump(x, y, pos) {
         }
         else return null;
     }
+}
+
+function resetJumps() {
+    jumpPositions = [];
+    canJump = false;
 }
 
 function storeJumpData(startX, startY, adjX, adjY, jPos) {
