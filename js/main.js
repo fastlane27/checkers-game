@@ -176,9 +176,10 @@ function isValidMove(sel, tar) {
                 return true;
             } else return false;
         }
-    } else if (jumpPositions.some(elem => elem.jumpPos !== null)) {
+    } else {
         for (let i = 0; i < jumpPositions.length; i++) {
-            if (curX === jumpPositions[i].startPos[0] && curY === jumpPositions[i].startPos[1] && tarX === jumpPositions[i].jumpPos[0] && tarY === jumpPositions[i].jumpPos[1]) {
+            if (jumpPositions[i].jumpPos !== null && curX === jumpPositions[i].startPos[0] 
+                && curY === jumpPositions[i].startPos[1] && tarX === jumpPositions[i].jumpPos[0] && tarY === jumpPositions[i].jumpPos[1]) {
                 clearPiece(jumpPositions[i].adjacentPos[0], jumpPositions[i].adjacentPos[1]);
                 return true;
             } 
