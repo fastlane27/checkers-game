@@ -262,42 +262,43 @@ function checkAdjacent() {
 }
 
 function checkJump(x, y, pos) {
-    canJump = true;
     if (x % 2 === 1) {
         if (pos === 'tl' && x > 0 && y > 0 && board[x-1][y-1] === null) {
+            canJump = true;
             return [x-1, y-1];
         }
         else if (pos === 'tr' && x > 0 && board[x-1][y] === null) {
+            canJump = true;
             return [x-1, y];
         }
         else if (pos === 'bl' && x < 7 && y > 0 && board[x+1][y-1] === null) {
+            canJump = true;
             return [x+1, y-1];
         }
         else if (pos === 'br' && x < 7 && board[x+1][y] === null) {
+            canJump = true;
             return [x+1, y];
         }
-        else {
-            canJump = false;
-            return null;
-        }
+        else return null;
     }
     if (x % 2 === 0) {
         if (pos === 'tl' && x > 0 && board[x-1][y] === null) {
+            canJump = true;
             return [x-1, y];
         }
         else if (pos === 'tr' && x > 0 && y < 3 && board[x-1][y+1] === null) {
+            canJump = true;
             return [x-1, y+1];
         }
         else if (pos === 'bl' && x < 7 && board[x+1][y] === null) {
+            canJump = true;
             return [x+1, y];
         }
         else if (pos === 'br' && x < 7 && y < 3 && board[x+1][y+1] === null) {
+            canJump = true;
             return [x+1, y+1];
         }
-        else {
-            canJump = false;
-            return null;
-        }
+        else return null;
     }
 }
 
