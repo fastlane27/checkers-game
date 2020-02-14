@@ -6,6 +6,9 @@ class GamePiece {
         this.posY = posY;
         this.isKing = false;
     }
+    renderKing() {
+        this.pieceEl.innerHTML = '<img src="imgs/crown.png">';
+    }
 }
 
 class BlackPiece extends GamePiece {
@@ -114,7 +117,11 @@ function renderPieces() {
             }
         }
         if (square.hasChildNodes() && board[x][y] === null) {
+            square.classList.remove('occupied');
             square.firstChild.remove();
+        }
+        if (board[x][y] !== null && board[x][y].isKing) {
+            board[x][y].renderKing();
         }
     });
 }
@@ -161,7 +168,7 @@ function isValidMove(sel, tar) {
     let tarX = parseInt(tar.dataset.x);
     let tarY = parseInt(tar.dataset.y);
     if (jumpPositions.length === 0 || jumpPositions.every(elem => elem.jumpPos === null)) {
-        if (board[curX][curY].isKing || tarX === curX + playerVal) {
+        if ((board[curX][curY].isKing && (tarX === curX - 1 || tarX === curX + 1)) || tarX === curX + playerVal) {
             if (tarY === curY) return true;
             else if (curX % 2 === 1 && tarY === curY - 1) {
                 return true;
@@ -169,13 +176,14 @@ function isValidMove(sel, tar) {
                 return true;
             } else return false;
         }
-    } else if (!jumpPositions.some(elem => elem.jumpPos === null)) {
+    } else if (jumpPositions.some(elem => elem.jumpPos !== null)) {
         for (let i = 0; i < jumpPositions.length; i++) {
             if (curX === jumpPositions[i].startPos[0] && curY === jumpPositions[i].startPos[1] && tarX === jumpPositions[i].jumpPos[0] && tarY === jumpPositions[i].jumpPos[1]) {
                 clearPiece(jumpPositions[i].adjacentPos[0], jumpPositions[i].adjacentPos[1]);
                 return true;
-            } else return false;
+            } 
         }
+        return false;
     }
 }
 
@@ -200,38 +208,54 @@ function checkAdjacent() {
             if (position !== null && position.player === turn) {
                 if (x % 2 === 1) {
                     if (x > 0 && y > 0 && board[x-1][y-1] !== null && board[x-1][y-1].player !== position.player) {
-                        pos = 'tl';
-                        jumpPositions.push(storeJumpData(x, y, x-1, y-1, checkJump(x-1, y-1, pos)));
+                        if (position.player === -1 || position.isKing) {
+                            pos = 'tl';
+                            jumpPositions.push(storeJumpData(x, y, x-1, y-1, checkJump(x-1, y-1, pos)));
+                        }
                     }
                     if (x > 0 && board[x-1][y] !== null && board[x-1][y].player !== position.player) {
-                        pos = 'tr';
-                        jumpPositions.push(storeJumpData(x, y, x-1, y, checkJump(x-1, y, pos)));
+                        if (position.player === -1 || position.isKing) {
+                            pos = 'tr';
+                            jumpPositions.push(storeJumpData(x, y, x-1, y, checkJump(x-1, y, pos)));
+                        }
                     }
                     if (x < 7 && y > 0 && board[x+1][y-1] !== null && board[x+1][y-1].player !== position.player) {
-                        pos = 'bl';
-                        jumpPositions.push(storeJumpData(x, y, x+1, y-1, checkJump(x+1, y-1, pos)));
+                        if (position.player === 1 || position.isKing) {
+                            pos = 'bl';
+                            jumpPositions.push(storeJumpData(x, y, x+1, y-1, checkJump(x+1, y-1, pos)));
+                        }
                     }
                     if (x < 7 && board[x+1][y] !== null && board[x+1][y].player !== position.player) {
-                        pos = 'br';
-                        jumpPositions.push(storeJumpData(x, y, x+1, y, checkJump(x+1, y, pos)));
+                        if (position.player === 1 || position.isKing) {
+                            pos = 'br';
+                            jumpPositions.push(storeJumpData(x, y, x+1, y, checkJump(x+1, y, pos)));
+                        }
                     }
                }
                if (x % 2 === 0) {
                     if (x > 0 && board[x-1][y] !== null && board[x-1][y].player !== position.player) {
-                        pos ='tl';
-                        jumpPositions.push(storeJumpData(x, y, x-1, y, checkJump(x-1, y, pos)));
+                        if (position.player === -1 || position.isKing) {
+                            pos ='tl';
+                            jumpPositions.push(storeJumpData(x, y, x-1, y, checkJump(x-1, y, pos)));
+                        }
                     }
                     if (x > 0 && y < 3 && board[x-1][y+1] !== null && board[x-1][y+1].player !== position.player) {
-                        pos = 'tr';
-                        jumpPositions.push(storeJumpData(x, y, x-1, y+1, checkJump(x-1, y+1, pos)));
+                        if (position.player === -1 || position.isKing) {
+                            pos = 'tr';
+                            jumpPositions.push(storeJumpData(x, y, x-1, y+1, checkJump(x-1, y+1, pos)));
+                        }
                     }
                     if (x < 7 && board[x+1][y] !== null && board[x+1][y].player !== position.player) {
-                        pos = 'bl';
-                        jumpPositions.push(storeJumpData(x, y, x+1, y, checkJump(x+1, y, pos)));
+                        if (position.player === 1 || position.isKing) {
+                            pos = 'bl';
+                            jumpPositions.push(storeJumpData(x, y, x+1, y, checkJump(x+1, y, pos)));
+                        }
                     }
                     if (x < 7 && y < 3 && board[x+1][y+1] !== null && board[x+1][y+1].player !== position.player) {
-                        pos = 'br';
-                        jumpPositions.push(storeJumpData(x, y, x+1, y+1, checkJump(x+1, y+1, pos)));
+                        if (position.player === 1 || position.isKing) {
+                            pos = 'br';
+                            jumpPositions.push(storeJumpData(x, y, x+1, y+1, checkJump(x+1, y+1, pos)));
+                        }
                     }
                 }
             }

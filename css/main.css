@@ -59,6 +59,9 @@ section {
 }
 
 span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 78%;
     height: 78%;
     border-radius: 50%;
@@ -69,8 +72,7 @@ span {
     border-color: yellow;
 }
 
-.king {
-    width: 50%;
-    height: 50%;
-    border-radius: 50%;
+img {
+    width: 60%;
+    pointer-events: none;
 }
